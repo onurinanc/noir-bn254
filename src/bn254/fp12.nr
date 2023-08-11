@@ -1,30 +1,31 @@
 use dep::std::println;
 use dep::bigint::prime_field::PrimeField as Fp;
+use crate::bn254::fp6::Fp6;
 
-struct Fp2 {
-    c0: Fp,
-    c1: Fp,
+struct Fp12 {
+    c0: Fp6,
+    c1: Fp6,
 }
 
-impl Fp2 {
-    fn new(c0: Fp, c1: Fp) -> Self {
-        Fp2{
+impl Fp12 {
+    fn new(c0: Fp6, c1: Fp6) -> Self {
+        Fp12{
             c0,
             c1,
         }
     }
 
-    fn zero() -> Fp2 {
-        Fp2{
-            c0: Fp::zero(),
-            c1: Fp::zero(),
+    fn zero() -> Fp12 {
+        Fp12{
+            c0: Fp6::zero(),
+            c1: Fp6::zero(),
         }
     }
 
-    fn one() -> Fp2 {
-        Fp2{
-            c0: Fp::one(),
-            c1: Fp::zero(),
+    fn one() -> Fp12 {
+        Fp12{
+            c0: Fp6::one(),
+            c1: Fp6::zero(),
         }
     }
 
@@ -43,14 +44,17 @@ impl Fp2 {
     }
 
     fn mul(self: Self, other: Self) -> Self {
-        let t1 = self.c0.mul(other.c0);
-        let t0 = self.c0.add(self.c1);
-        let t2 = self.c1.mul(other.c1);
-        let c1 = other.c0.add(other.c1);
-        let c0 = t1.sub(t2);
-        let t1 = t1.add(t2);
-        let t0 = t0.mul(c1);
-        let c1 = t0.sub(t1);
+        let t0 = self.c0.mul(other.c0);
+        let t1 = self.c1.mul(other.c1);
+        let t2 = other.c0.add(other.c1);
+
+        let c1 = self.c1.add(self.c0);
+        let c1 = c1.mul(t2);
+        let c1 = c1.sub(t0);
+        let c1 = c1.sub(t1);
+
+        let t1 = t1.mul_by_nonresidue();
+        let c0 = t0.add(t1);
 
         Self{
             c0,
@@ -68,14 +72,18 @@ impl Fp2 {
     fn square(self: Self) -> Self {
         let ab = self.c0.mul(self.c1);
         let c0c1 = self.c0.add(self.c1);
-        let c0 = self.c1.neg();
+        let c0 = self.c1.mul_by_nonresidue();
         let c0 = c0.add(self.c0);
         let c0 = c0.mul(c0c1);
         let c0 = c0.sub(ab);
 
+        let c1 = ab.add(ab);
+        let tmp = ab.mul_by_nonresidue();
+        let c0 = c0.sub(tmp);
+
         Self {
-            c0: c0.add(ab),
-            c1: ab.double(),
+            c0,
+            c1,
         }
     }
 
@@ -105,13 +113,14 @@ impl Fp2 {
         self.c0.is_one() & self.c1.is_zero()
     }
 
-    // Algorithm 8 from: https://eprint.iacr.org/2010/354.pdf
-    fn invert(self: Self) -> Self {
-        let t0 = self.c0.mul(self.c0);
-        let t1 = self.c1.mul(self.c1);
-        let t0 = t0.add(t1);
+    // Algorithm 23 from: https://eprint.iacr.org/2010/354.pdf
+    fn invert_x(self: Self) -> Self {
+        let t0 = self.c0.square();
+        let t1 = self.c1.square();
+        let t1 = t1.mul_by_nonresidue();
+        let t0 = t0.sub(t1);
         let t1 = t0.invert();
-        let c0 = t1.mul(self.c0);
+        let c0 = self.c0.mul(t1);
         let c1 = self.c1.mul(t1);
         let c1 = c1.neg();
 
@@ -121,19 +130,16 @@ impl Fp2 {
         }
     }
 
-    fn mul_by_nonresidue(self: Self) -> Self {
-        let t0 = self.c0;
-        let t1 = self.c1;
-
-        let p2 = self.double();
-        let p4 = p2.double();
-        let p8 = p4.double();
-
-        let c0 = p8.c0.add(t0);
-        let c0 = c0.sub(t1);
-
-        let c1 = p8.c1.add(t1);
-        let c1 = c1.add(t0);
+     fn invert(self: Self) -> Self {
+        let c0s = self.c0.mul(self.c0);
+        let c1s = self.c1.mul(self.c1);
+        let c1s = c1s.mul_by_nonresidue();
+        let c0s = c0s.sub(c1s);
+        let c0 = c0s.invert();
+        let c1 = c0s.invert();
+        let c0 = c0.mul(self.c0);
+        let c1 = c1.mul(self.c1);
+        let c1 = c1.neg();
 
         Self{
             c0,
@@ -141,7 +147,6 @@ impl Fp2 {
         }
     }
 
-
-
+   
 
 }
