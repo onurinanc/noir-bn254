@@ -2,16 +2,26 @@ use dep::std::println;
 use dep::bigint::prime_field::PrimeField as Fp;
 use dep::bigint::prime_field_fq::PrimeField as Fq;
 
-mod swcurve;
 mod fp2;
 mod fp6;
 mod fp12;
+mod g2;
+mod pairing;
+mod swcurve;
+mod constants;
 
-use swcurve::Point;
-use swcurve::Curve;
+
 use fp2::Fp2;
 use fp6::Fp6;
 use fp12::Fp12;
+use g2::G2Point;
+use g2::G2Curve;
+use swcurve::Point;
+use swcurve::Curve;
+
+struct BN254G2 {
+    curve: G2Curve,
+}
 
 struct BN254 {
     curve: Curve,
@@ -27,6 +37,79 @@ fn bn254() -> BN254 {
                 Fp::from_u56(2),
             ),
         ),
+    }
+}
+
+fn bn254_g2() -> BN254G2 {
+    // Construct a, b, and gen for G2 Curve
+    // G2_A, G2_B_ G2_GENERATOR_X, and G2_GENERATOR_Y
+
+    let G2_A = Fp2::zero();
+    let G2_B: Fp2 = Fp2::new(
+        Fp::from_bytes(
+                    [
+                        0xe5, 0x38, 0xa1, 0x24, 0xdc, 0xe6, 0x67, 0x32, 
+                        0xa3, 0xef, 0xdb, 0x59, 0xe5, 0xc5, 0xb4, 0xb5, 
+                        0xc3, 0x6a, 0xe0, 0x1b, 0x99, 0x18, 0xbe, 0x81, 
+                        0xae, 0xaa, 0xb8, 0xce, 0x40, 0x9d, 0x14, 0x2b
+                    ]
+                ),
+        Fp::from_bytes(
+                    [
+                        0xd2, 0x15, 0xc3, 0x85, 0x06, 0xbd, 0xa2, 0xe4, 
+                        0x52, 0x18, 0x2d, 0xe5, 0x84, 0xa0, 0x4f, 0xa7, 
+                        0xf4, 0xfd, 0xd8, 0xee, 0xad, 0xaf, 0x2c, 0xcd, 
+                        0xd4, 0xfe, 0xf0, 0x3a, 0xb0, 0x13, 0x97, 0x00
+                    ]
+                )
+    );
+    let G2_GENERATOR_X: Fp2 = Fp2::new(
+        Fp::from_bytes(
+                    [
+                        0xed, 0xf6, 0x92, 0xd9, 0x5c, 0xbd, 0xde, 0x46, 
+                        0xdd, 0xda, 0x5e, 0xf7, 0xd4, 0x22, 0x43, 0x67, 
+                        0x79, 0x44, 0x5c, 0x5e, 0x66, 0x00, 0x6a, 0x42, 
+                        0x76, 0x1e, 0x1f, 0x12, 0xef, 0xde, 0x00, 0x18
+                    ]
+                ),
+        Fp::from_bytes(
+                    [
+                        0xc2, 0x12, 0xf3, 0xae, 0xb7, 0x85, 0xe4, 0x97, 
+                        0x12, 0xe7, 0xa9, 0x35, 0x33, 0x49, 0xaa, 0xf1, 
+                        0x25, 0x5d, 0xfb, 0x31, 0xb7, 0xbf, 0x60, 0x72, 
+                        0x3a, 0x48, 0x0d, 0x92, 0x93, 0x93, 0x8e, 0x19
+                    ]
+                )
+    );
+
+    let G2_GENERATOR_Y: Fp2 = Fp2::new(
+        Fp::from_bytes(
+                    [
+                        0xaa, 0x7d, 0xfa, 0x66, 0x01, 0xcc, 0xe6, 0x4c, 
+                        0x7b, 0xd3, 0x43, 0x0c, 0x69, 0xe7, 0xd1, 0xe3, 
+                        0x8f, 0x40, 0xcb, 0x8d, 0x80, 0x71, 0xab, 0x4a, 
+                        0xeb, 0x6d, 0x8c, 0xdb, 0xa5, 0x5e, 0xc8, 0x12
+                    ]
+                ),
+        Fp::from_bytes(
+                    [
+                        0x5b, 0x97, 0x22, 0xd1, 0xdc, 0xda, 0xac, 0x55, 
+                        0xf3, 0x8e, 0xb3, 0x70, 0x33, 0x31, 0x4b, 0xbc, 
+                        0x95, 0x33, 0x0c, 0x69, 0xad, 0x99, 0x9e, 0xec, 
+                        0x75, 0xf0, 0x5f, 0x58, 0xd0, 0x89, 0x06, 0x09
+                    ]
+                )
+    );
+
+    BN254G2 {
+        curve: G2Curve::new(
+            Fp2::zero(),
+            G2_B,
+            G2Point::from_affine(
+                G2_GENERATOR_X,
+                G2_GENERATOR_Y,
+            )
+        )
     }
 }
 
@@ -320,9 +403,10 @@ fn test_fp6_invert() {
     let c: Fp2 = Fp2::new(Fp::from_u56(8), Fp::from_u56(11));
     let d: Fp2 = Fp2::new(Fp::from_u56(1), Fp::from_u56(2));
 
-    let a: Fp6 = Fp6::new(b, c, d);
+    let a = Fp6::new(b, c, d);
     let b = a.invert();
     let c = a.mul(b);
+
     // assert(c.eq(Fp6::one()));
     Fp::println(c.c0.c0);
     Fp::println(c.c0.c1);
@@ -446,6 +530,51 @@ fn test_fp12_invert() {
     assert(c.eq(Fp12::one()));
 }
 
+#[test]
+fn test_fp12_final_exp() {
+    let a: Fp2 = Fp2::new(Fp::from_u56(1), Fp::from_u56(2));
+    let b: Fp2 = Fp2::new(Fp::from_u56(3), Fp::from_u56(5));
+    let c: Fp2 = Fp2::new(Fp::from_u56(8), Fp::from_u56(11));
+    
+    let a1: Fp6 = Fp6::new(a, b, c);
+    let a2: Fp6 = Fp6::new(a, a, b);
+    let a3: Fp6 = Fp6::new(b, c, c);
+    let a4: Fp6 = Fp6::new(c, b, a);
+
+    let x1: Fp12 = Fp12::new(a1, a4);
+    let x2: Fp12 = Fp12::new(a3, a2);
+    let x3: Fp12 = Fp12::new(a4, a2);
+    
+    let res = pairing::final_exponentiation(x1);
+}
+
+
+#[test]
+fn test_bn254g2_add1() {
+    let BN254G2 { curve } = bn254_g2();
+
+    let p = curve.add(G2Point::zero(), G2Point::zero());
+    assert(p.is_zero()); 
+}
+
+#[test]
+fn test_bn254g2_add2() {
+    let BN254G2 { curve } = bn254_g2();
+
+    let p = curve.add(curve.gen, G2Point::zero());
+    assert(p.eq(curve.gen));
+}
+
+#[test]
+fn test_bn254g2_add3() {
+    let BN254G2 { curve } = bn254_g2();
+
+    let p = curve.add(curve.double(curve.gen), curve.gen);
+    let q = curve.add(curve.double(curve.gen), curve.double(curve.gen));
+    let p_1 = curve.add(p, curve.gen);
+    assert(p_1.eq(q));
+}
+
 //#[test]
 //fn test_mul_bench() {
 //    // Works in ~5-10 minutes
@@ -480,4 +609,12 @@ fn test_field_methods() {
     println(a0);
     println(a1);
     println(a2);
+}
+
+#[test]
+fn test_pairing_rough() {
+    let g2: BN254G2 = bn254_g2();
+    let g1: BN254 = bn254();
+
+    pairing::pair(g2.curve.gen, g1.curve.gen);  
 }
