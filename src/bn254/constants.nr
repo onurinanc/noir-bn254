@@ -1,3 +1,4 @@
+// Canonical signed digit decomposition (Non-Adjacent form) of 6x₀+2 = 29793968203157093288  little endian
 global NAF_DIGIT: [u2; 66] = [
     0,
     0,

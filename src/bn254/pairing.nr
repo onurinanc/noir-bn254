@@ -249,3 +249,4 @@ fn pair(Q: G2Point, P: Point) -> Fp12 {
     let res = final_exponentiation(res);
     res
 }
+

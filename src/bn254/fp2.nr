@@ -1,11 +1,13 @@
 use dep::std::println;
 use dep::bigint::prime_field::PrimeField as Fp;
 
+// An element of Fp2 is respresented by c0 + c1 * u
 struct Fp2 {
     c0: Fp,
     c1: Fp,
 }
 
+// Fp2 tower extension impl
 impl Fp2 {
     fn new(c0: Fp, c1: Fp) -> Self {
         Fp2{
@@ -86,6 +88,7 @@ impl Fp2 {
         }
     }
 
+    // conjugate by negating c1
     fn conjugate(self: Self) -> Self {
         Self {
             c0: self.c0,
@@ -132,6 +135,7 @@ impl Fp2 {
         }
     }
 
+    // Multiply this element by quadratic nonresidue 9 + u
     fn mul_by_nonresidue(self: Self) -> Self {
         let t0 = self.c0;
         let t1 = self.c1;
@@ -151,6 +155,9 @@ impl Fp2 {
             c1,
         }
     }
+
+    // Those values starting from mul_by_non_residue_(1-3)_power(1-5)
+    // https://github.com/keep-starknet-strange/garaga/blob/main/src/bn254/towers/e2.cairo#L1276
 
     fn mul_by_non_residue_1_power_1(self: Self) -> Self {
         let y = Fp2::new(

@@ -99,7 +99,6 @@ impl Point {
     }
 }
 
-
 impl Curve {
     // Curve constructor
     fn new(a: Fp, b: Fp, gen: Point) -> Curve {
@@ -206,28 +205,10 @@ impl Curve {
 
     // Scalar multiplication with scalar represented by a bit array (little-endian convention).
     // If k is the natural number represented by `bits`, then this computes p + ... + p k times.
-    fn bit_mul<N>(self, bits: [u1; N], p: Point) -> Point {
-        let mut out = Point::zero();
-        
-        for i in 0..N {
-            // TODO: Only start at first non-zero bit
-            out = self.double(out);
-            if(bits[N - i - 1] == 1) {
-                out = self.add(out, p);
-            }
-            // BUG: This breaks
-            // out = self.add(
-            //     self.add(out, out),
-            //     if(bits[N - i - 1] == 0) {Point::zero()} else {p});
-        }
-
-        out
-    }
-
     fn bit_mul_Field<N>(self, bits: [u1; N], p: Point) -> Point {
         let mut out = Point::zero();
         
-        for i in 0..254 {
+        for i in 0..N {
             // TODO: Only start at first non-zero bit
             out = self.double(out);
             if(bits[253 - i] == 1) {
@@ -237,15 +218,8 @@ impl Curve {
 
         out
     }
-    
-    //Scalar multiplication (p + ... + p n times)
-    // n = order
-    fn mul(self, n: Fq, p: Point) -> Point {
-        let n_as_bits = n.to_bits();
-        self.bit_mul(n_as_bits, p)
-    }
 
-    // Bir örnek için doğru çalışıyor 3*G için fakat 
+    // An example impl to compute 3*G
     fn mul_Field(self, n: Field, p: Point) -> Point {
         let n_as_bits = n.to_le_bits(2);
         let mut out = Point::zero();

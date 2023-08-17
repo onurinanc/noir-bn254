@@ -1,6 +1,5 @@
 use dep::std::println;
 use dep::bigint::prime_field::PrimeField as Fp;
-use dep::bigint::prime_field_fq::PrimeField as Fq;
 
 mod fp2;
 mod fp6;
@@ -19,14 +18,17 @@ use g2::G2Curve;
 use swcurve::Point;
 use swcurve::Curve;
 
+// G2 curve for BN254
 struct BN254G2 {
     curve: G2Curve,
 }
 
+// G1 curve for BN254
 struct BN254 {
     curve: Curve,
 }
 
+// Construct G1 curve for BN254
 fn bn254() -> BN254 {
     BN254 {
         curve: Curve::new(
@@ -40,6 +42,7 @@ fn bn254() -> BN254 {
     }
 }
 
+// Construct G2 curve for BN254
 fn bn254_g2() -> BN254G2 {
     // Construct a, b, and gen for G2 Curve
     // G2_A, G2_B_ G2_GENERATOR_X, and G2_GENERATOR_Y
@@ -113,6 +116,7 @@ fn bn254_g2() -> BN254G2 {
     }
 }
 
+// O + O = O
 #[test]
 fn test_bn254_add1() {
     let BN254 { curve } = bn254();
@@ -121,6 +125,7 @@ fn test_bn254_add1() {
     assert(p.is_zero()); 
 }
 
+// O + G = G
 #[test]
 fn test_bn254_add2() {
     let BN254 { curve } = bn254();
@@ -129,6 +134,7 @@ fn test_bn254_add2() {
     assert(p.eq(curve.gen));
 }
 
+// (2*G + G) + G = 4*G
 #[test]
 fn test_bn254_add3() {
     let BN254 { curve } = bn254();
@@ -139,6 +145,7 @@ fn test_bn254_add3() {
     assert(p_1.eq(q));
 }
 
+// 2*G + G = 3*G
 #[test]
 fn test_bn254_add4() {
     let BN254 { curve } = bn254();
@@ -171,11 +178,12 @@ fn test_bn254_add4() {
     assert(p1.eq(p2));
 }
 
+// 3*G = 3*G
 #[test]
 fn test_bn254_mul1() {
     let BN254 { curve } = bn254();
 
-    let p1 = curve.mul(Fq::from_u56(3), curve.gen);
+    let p1 = curve.mul_Field(3, curve.gen);
 
     // p2 is the little endian representation of G * 3
     let p2 = Point::from_affine(
@@ -204,6 +212,7 @@ fn test_bn254_mul1() {
     assert(p1.eq(p2));
 }
 
+// 3*G
 #[test]
 fn test_bn254_mul_Field1() {
     let BN254 { curve } = bn254();
@@ -238,6 +247,7 @@ fn test_bn254_mul_Field1() {
     assert(p1.eq(p2));
 }
 
+// a + (b + c) == a + (c + b) == b + (c + a)
 #[test]
 fn test_fp2_add() {
     let a: Fp2 = Fp2::new(Fp::from_u56(1), Fp::from_u56(2));
@@ -256,6 +266,7 @@ fn test_fp2_add() {
     assert(t1.c1.eq(t2.c1));
 }
 
+// a * (b * c) == a * (c * b) = b * (c * a)
 #[test]
 fn test_fp2_mul() {
     let a: Fp2 = Fp2::new(Fp::from_u56(1), Fp::from_u56(2));
@@ -274,6 +285,7 @@ fn test_fp2_mul() {
     assert(t1.c1.eq(t2.c1));
 }
 
+// a + a == 2*a
 #[test]
 fn test_fp2_double() {
     let a: Fp2 = Fp2::new(Fp::from_u56(8), Fp::from_u56(11));
@@ -284,6 +296,7 @@ fn test_fp2_double() {
     assert(b.c1.eq(c.c1));
 }
 
+// a * a == a^2
 #[test]
 fn test_fp2_square() {
     let a: Fp2 = Fp2::new(Fp::from_u56(8), Fp::from_u56(11));
@@ -294,6 +307,16 @@ fn test_fp2_square() {
     assert(b.c1.eq(c.c1));
 }
 
+// (2+2u) * (9+u) = (16+20u)
+#[test]
+fn test_fp2_mul_by_nonresidue(){
+    let a: Fp2 = Fp2::new(Fp::from_u56(1), Fp::from_u56(1));
+    let a = a.mul_by_nonresidue();
+    Fp::println(a.c0);
+    Fp::println(a.c1);
+}
+
+// a*a^-1 == O
 #[test]
 fn test_fp2_invert() {
     let a: Fp2 = Fp2::new(Fp::from_u56(1), Fp::from_u56(2));
@@ -304,6 +327,7 @@ fn test_fp2_invert() {
     Fp::println(c.c1);
 }
 
+// a*a^-1 == O
 #[test]
 fn test_fp2_invert2() {
     let a: Fp2 = Fp2::new(Fp::from_u56(2347), Fp::from_u56(9812));
@@ -316,6 +340,7 @@ fn test_fp2_invert2() {
     Fp::println(c.c1);
 }
 
+// a + (b + c) == a + (c + b) == b + (c + a)
 #[test]
 fn test_fp6_add() {
     let a: Fp2 = Fp2::new(Fp::from_u56(1), Fp::from_u56(2));
@@ -341,6 +366,7 @@ fn test_fp6_add() {
     assert(t1.c2.eq(t2.c2));
 }
 
+// a * (b * c) == a * (c * b) = b * (c * a)
 #[test]
 fn test_fp6_mul() {
     let a: Fp2 = Fp2::new(Fp::from_u56(1), Fp::from_u56(2));
@@ -366,6 +392,22 @@ fn test_fp6_mul() {
     assert(t1.c2.eq(t2.c2));
 }
 
+// a * O = O
+#[test]
+fn test_fp6_mul2() {
+    let a: Fp2 = Fp2::new(Fp::from_u56(1), Fp::from_u56(2));
+    let b: Fp2 = Fp2::new(Fp::from_u56(3), Fp::from_u56(5));
+    let c: Fp2 = Fp2::new(Fp::from_u56(8), Fp::from_u56(11));
+    
+    let x1: Fp6 = Fp6::new(a, b, c);
+    let x2: Fp6 = Fp6::new(c, b, b);
+    let x3: Fp6 = Fp6::new(b, c, c);
+
+    let x = x1.mul(Fp6::one());
+    assert(x.eq(x1));
+}
+
+// a + a == 2*a
 #[test]
 fn test_fp6_double() {
     let b: Fp2 = Fp2::new(Fp::from_u56(3), Fp::from_u56(5));
@@ -381,6 +423,7 @@ fn test_fp6_double() {
     assert(b.c2.eq(c.c2));
 }
 
+// a * a == a^2
 #[test]
 fn test_fp6_square() {
     let b: Fp2 = Fp2::new(Fp::from_u56(3), Fp::from_u56(5));
@@ -396,15 +439,15 @@ fn test_fp6_square() {
     assert(x.c2.eq(y.c2));
 }
 
-// Works correctly
+// a*a^-1 == O
 #[test]
 fn test_fp6_invert() {
-    let b: Fp2 = Fp2::new(Fp::from_u56(3), Fp::from_u56(5));
-    let c: Fp2 = Fp2::new(Fp::from_u56(8), Fp::from_u56(11));
-    let d: Fp2 = Fp2::new(Fp::from_u56(1), Fp::from_u56(2));
+    let x: Fp2 = Fp2::new(Fp::from_u56(3), Fp::from_u56(5));
+    let y: Fp2 = Fp2::new(Fp::from_u56(8), Fp::from_u56(11));
+    let z: Fp2 = Fp2::new(Fp::from_u56(1), Fp::from_u56(2));
 
-    let a = Fp6::new(b, c, d);
-    let b = a.invert();
+    let a = Fp6::new(x, y, z);
+    let b = a.invert_x();
     let c = a.mul(b);
 
     // assert(c.eq(Fp6::one()));
@@ -416,6 +459,7 @@ fn test_fp6_invert() {
     Fp::println(c.c2.c1);
 }
 
+// a + (b + c) == a + (c + b) == b + (c + a)
 #[test]
 fn test_fp12_add() {
     let a: Fp2 = Fp2::new(Fp::from_u56(1), Fp::from_u56(2));
@@ -443,6 +487,7 @@ fn test_fp12_add() {
     assert(t1.c1.eq(t2.c1));
 }
 
+// a * (b * c) == a * (c * b) = b * (c * a)
 #[test]
 fn test_fp12_mul() {
     let a: Fp2 = Fp2::new(Fp::from_u56(1), Fp::from_u56(2));
@@ -470,6 +515,7 @@ fn test_fp12_mul() {
     assert(t1.c1.eq(t2.c1));
 }
 
+// a + a == 2*a
 #[test]
 fn test_fp12_double() {
     let a: Fp2 = Fp2::new(Fp::from_u56(1), Fp::from_u56(2));
@@ -490,6 +536,7 @@ fn test_fp12_double() {
     assert(b.c1.eq(c.c1));
 }
 
+// a * a == a^2
 #[test]
 fn test_fp12_square() {
     let a: Fp2 = Fp2::new(Fp::from_u56(1), Fp::from_u56(2));
@@ -510,6 +557,7 @@ fn test_fp12_square() {
     assert(b.c1.eq(c.c1));
 }
 
+// a*a^-1 == O
 #[test]
 fn test_fp12_invert() {
     let a: Fp2 = Fp2::new(Fp::from_u56(1), Fp::from_u56(2));
@@ -530,6 +578,58 @@ fn test_fp12_invert() {
     assert(c.eq(Fp12::one()));
 }
 
+// O + O = O
+#[test]
+fn test_bn254g2_add1() {
+    let BN254G2 { curve } = bn254_g2();
+
+    let p = curve.add(G2Point::zero(), G2Point::zero());
+    assert(p.is_zero()); 
+}
+
+// O + G = G
+#[test]
+fn test_bn254g2_add2() {
+    let BN254G2 { curve } = bn254_g2();
+
+    let p = curve.add(curve.gen, G2Point::zero());
+    assert(p.eq(curve.gen));
+}
+
+// (2*G + G) + G = (2*G + 2*G)
+#[test]
+fn test_bn254g2_add3() {
+    let BN254G2 { curve } = bn254_g2();
+
+    let p = curve.add(curve.double(curve.gen), curve.gen);
+    let q = curve.add(curve.double(curve.gen), curve.double(curve.gen));
+    let p_1 = curve.add(p, curve.gen);
+    assert(p_1.eq(q));
+}
+
+// Basic invert function for Fp
+#[test]
+fn test_inversion() {
+    let a = Fp::from_u56(8);
+    let b = a.invert();
+    let c = a.mul(b);
+    assert(c.eq(Fp::one()));
+}
+
+// for i in 0..8 -> 2 minutes
+// for i in 0..10 -> 3 minutes
+// for i in 0..12 -> 4 minutes
+// for i in 0..64 -> ~30 minutes
+// 16 GB RAM, Intel Core i5-12450H
+//#[test]
+//fn test_miller_loop() {
+//    let g2: BN254G2 = bn254_g2();
+//    let g1: BN254 = bn254();
+//
+//    let res = pairing::miller_loop(g2.curve.gen, g1.curve.gen); 
+//}
+
+
 #[test]
 fn test_fp12_final_exp() {
     let a: Fp2 = Fp2::new(Fp::from_u56(1), Fp::from_u56(2));
@@ -548,73 +648,12 @@ fn test_fp12_final_exp() {
     let res = pairing::final_exponentiation(x1);
 }
 
-
-#[test]
-fn test_bn254g2_add1() {
-    let BN254G2 { curve } = bn254_g2();
-
-    let p = curve.add(G2Point::zero(), G2Point::zero());
-    assert(p.is_zero()); 
-}
-
-#[test]
-fn test_bn254g2_add2() {
-    let BN254G2 { curve } = bn254_g2();
-
-    let p = curve.add(curve.gen, G2Point::zero());
-    assert(p.eq(curve.gen));
-}
-
-#[test]
-fn test_bn254g2_add3() {
-    let BN254G2 { curve } = bn254_g2();
-
-    let p = curve.add(curve.double(curve.gen), curve.gen);
-    let q = curve.add(curve.double(curve.gen), curve.double(curve.gen));
-    let p_1 = curve.add(p, curve.gen);
-    assert(p_1.eq(q));
-}
-
+// ~33 minutes
+// 16 GB RAM, Intel Core i5-12450H
 //#[test]
-//fn test_mul_bench() {
-//    // Works in ~5-10 minutes
-//    let BN254 { curve } = bn254();
-//    let mut out = curve.gen;
-//    let mut count = true;
+//fn test_pairing_rough() {
+//    let g2: BN254G2 = bn254_g2();
+//    let g1: BN254 = bn254();
 //
-//    for i in 0..250 {
-//        let out = curve.double(out);
-//        let out = curve.add(out, curve.gen);
-//    }
+//    let res = pairing::pair(g2.curve.gen, g1.curve.gen);  
 //}
-
-
-#[test]
-fn test_inversion() {
-    let a = Fp::from_u56(8);
-    let b = a.invert();
-    let c = a.mul(b);
-    assert(c.eq(Fp::one()));
-}
-
-// Try field methods
-#[test]
-fn test_field_methods() {
-    let p_min_1: Field = 1;
-    println(p_min_1);
-    let x = p_min_1.to_le_bits(254);
-    let a0 = x[0];
-    let a1 = x[1];
-    let a2 = x[2];
-    println(a0);
-    println(a1);
-    println(a2);
-}
-
-#[test]
-fn test_pairing_rough() {
-    let g2: BN254G2 = bn254_g2();
-    let g1: BN254 = bn254();
-
-    pairing::pair(g2.curve.gen, g1.curve.gen);  
-}

@@ -2,6 +2,7 @@ use dep::std::println;
 use dep::bigint::prime_field::PrimeField as Fp;
 use crate::bn254::fp2::Fp2;
 
+// c0 + c1 * v + c2 * v^2
 struct Fp6 {
     c0: Fp2,
     c1: Fp2,
@@ -148,53 +149,11 @@ impl Fp6 {
         self.c0.is_one() & self.c1.is_zero() & self.c2.is_zero()
     }
 
-    // Algorithm 17 from: https://eprint.iacr.org/2010/354.pdf
-
     fn invert(self: Self) -> Self {
-        let t0 = self.c0.square();
-        let t1 = self.c1.square();
-        let t2 = self.c2.square();
-
-        let t3 = self.c0.mul(self.c1);
-        let t4 = self.c0.mul(self.c2);
-        let t5 = self.c2.mul(self.c1);
-
-        let tmp = t5.mul_by_nonresidue();
-        let c0 = t0.sub(tmp);
-        
-        let tmp = t2.mul_by_nonresidue();
-        let c1 = tmp.sub(t3);
-
-        let c2 = t1.mul(t4);
-
-        let t6 = self.c0.mul(c0);
-
-        let tmp = self.c2.mul(c1);
-        let tmp = tmp.mul_by_nonresidue();
-        let t6 = t6.add(tmp);
-
-        let tmp = self.c1.mul(c2);
-        let tmp = tmp.mul_by_nonresidue();
-        let t6 = t6.add(tmp);
-
-        let t6 = t6.invert();
-
-        let c0 = c0.mul(t6);
-        let c1 = c1.mul(t6);
-        let c2 = c2.mul(t6);
-
-        Self {
-            c0,
-            c1,
-            c2,
-        }
-    }
-
-    fn invert_x(self: Self) -> Self {
         let c0 = self.c2;
         let c0 = c0.mul_by_nonresidue();
         let c0 = c0.mul(self.c1);
-        let c0 = c0.sub(c0);
+        let c0 = c0.neg();
 
         let c0s = self.c0;
         let c0s = c0s.square();
@@ -234,9 +193,52 @@ impl Fp6 {
             c1,
             c2,
         }
-
     }
 
+    // Algorithm 17 from: https://eprint.iacr.org/2010/354.pdf
+    // Something works wrong here
+    fn invert_x(self: Self) -> Self {
+        let t0 = self.c0.square();
+        let t1 = self.c1.square();
+        let t2 = self.c2.square();
+
+        let t3 = self.c0.mul(self.c1);
+        let t4 = self.c0.mul(self.c2);
+        let t5 = self.c2.mul(self.c1);
+
+        let tmp = t5.mul_by_nonresidue();
+        let c0 = t0.sub(tmp);
+        
+        let tmp = t2.mul_by_nonresidue();
+        let c1 = tmp.sub(t3);
+
+        let c2 = t1.mul(t4);
+
+        let t6 = self.c0.mul(c0);
+
+        let tmp = self.c2.mul(c1);
+        let tmp = tmp.mul_by_nonresidue();
+        let t6 = t6.add(tmp);
+
+        let tmp = self.c1.mul(c2);
+        let tmp = tmp.mul_by_nonresidue();
+        let t6 = t6.add(tmp);
+
+        let t6 = t6.invert();
+
+        let c0 = c0.mul(t6);
+        let c1 = c1.mul(t6);
+        let c2 = c2.mul(t6);
+
+        Self {
+            c0,
+            c1,
+            c2,
+        }
+    }
+
+    // Multiply by cubic nonresidue v
+    // c0, c1, c2 -> c2, c0, c1
     fn mul_by_nonresidue(self: Self) -> Self {
         let c0 = self.c2.mul_by_nonresidue();
         let c1 = self.c0;

@@ -2,6 +2,7 @@ use dep::std::println;
 use dep::bigint::prime_field::PrimeField as Fp;
 use crate::bn254::fp6::Fp6;
 
+// c0 + c1 * w
 struct Fp12 {
     c0: Fp6,
     c1: Fp6
@@ -123,7 +124,7 @@ impl Fp12 {
     //    let c0 = self.c0.mul(t1);
     //    let c1 = self.c1.mul(t1);
     //    let c1 = c1.neg();
-//
+    //
     //    Self {
     //        c0,
     //        c1,
@@ -319,8 +320,6 @@ impl Fp12 {
 
         out
     }
-
-
 
     fn exponentiation(self: Self) -> Self {
         let six: comptime Field = 6;
