@@ -648,6 +648,12 @@ fn test_fp12_final_exp() {
     let res = pairing::final_exponentiation(x1);
 }
 
+#[test]
+fn test_final_exponentiation() {
+    let res = pairing::final_exponentiation(Fp12::one());
+    assert(res.eq(Fp12::one));
+}
+
 // ~33 minutes
 // 16 GB RAM, Intel Core i5-12450H
 //#[test]
@@ -657,3 +663,21 @@ fn test_fp12_final_exp() {
 //
 //    let res = pairing::pair(g2.curve.gen, g1.curve.gen);  
 //}
+
+// test bilinearity: e(P, Q + R) = e(P, Q) * e(P, R)
+//#[test]
+//fn test_pairing() {
+//    let g2: BN254G2 = bn254_g2();
+//    let g1: BN254 = bn254();
+//    let g1_double = g1.curve.double(g1.curve.gen);
+//
+//    let p_add_q = g1.curve.add(g1.curve.gen, g1_double);
+//    let lhs = pairing::pair(g2.curve.gen, p_add_q);
+//    let rhs_1 = pairing::pair(g2.curve.gen, g1.curve.gen);
+//    let rhs_2 = pairing::pair(g2.curve.gen, g1_double);
+//    let rhs = rhs_1.mul(rhs_2);
+//    assert(lhs.eq(rhs));
+//}
+
+
+

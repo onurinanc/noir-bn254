@@ -35,7 +35,6 @@ fn line_function_double_point(q: G2Point, p: Point) -> LineEval {
     let Z_T = Z_T.sub(q.z.square());
     let Y_T = tmp3.sub(X_T);
     let Y_T = Y_T.mul(tmp4);
-    // We might have calculated the below statement wrong
     let tmp2_8 = tmp2.double();
     let tmp2_8 = tmp2_8.double();
     let tmp2_8 = tmp2_8.double();
@@ -43,8 +42,6 @@ fn line_function_double_point(q: G2Point, p: Point) -> LineEval {
     let tmp3 = tmp4.mul(q.z.double());
     let tmp3 = tmp3.double();
     let tmp3 = tmp3.neg();
-    // Here, we need Algorithm 7 from Fp2
-    // p: Point should be in affine coordinates, so, this might be wrong
     let tmp3 = tmp3.mul_by_b0(p.x); 
     let tmp6 = tmp6.square();
     let tmp6 = tmp6.sub(tmp0);
@@ -54,8 +51,7 @@ fn line_function_double_point(q: G2Point, p: Point) -> LineEval {
     let tmp6 = tmp6.sub(tmp1_4);
     let tmp0 = Z_T.mul(q.z.square());
     let tmp0 = tmp0.double();
-    let tmp0 = tmp0.mul_by_b0(p.y); // p: Point should be in affine coordinates, so, this might be wrong
-    
+    let tmp0 = tmp0.mul_by_b0(p.y);
     let a0 = Fp6::new(
         tmp0,
         Fp2::zero(),

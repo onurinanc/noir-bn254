@@ -174,49 +174,7 @@ impl G2Curve {
             G2Point{ x: x0, y: y0, z: z0 }
         }
     }
-
-    // Scalar multiplication with scalar represented by a bit array (little-endian convention).
-    // If k is the natural number represented by `bits`, then this computes p + ... + p k times.
-    fn bit_mul<N>(self, bits: [u1; N], p: G2Point) -> G2Point {
-        let mut out = G2Point::zero();
-        
-        for i in 0..N {
-            // TODO: Only start at first non-zero bit
-            out = self.double(out);
-            if(bits[N - i - 1] == 1) {
-                out = self.add(out, p);
-            }
-            // BUG: This breaks
-            // out = self.add(
-            //     self.add(out, out),
-            //     if(bits[N - i - 1] == 0) {G2Point::zero()} else {p});
-        }
-
-        out
-    }
-
-    fn bit_mul_Field<N>(self, bits: [u1; N], p: G2Point) -> G2Point {
-        let mut out = G2Point::zero();
-        
-        for i in 0..254 {
-            // TODO: Only start at first non-zero bit
-            out = self.double(out);
-            if(bits[253 - i] == 1) {
-                out = self.add(out, p);
-            }
-        }
-
-        out
-    }
-    
-    //Scalar multiplication (p + ... + p n times)
-    // n = order
-    fn mul(self, n: Fq, p: G2Point) -> G2Point {
-        let n_as_bits = n.to_bits();
-        self.bit_mul(n_as_bits, p)
-    }
-
-    // Bir örnek için doğru çalışıyor 3*G için fakat 
+ 
     fn mul_Field(self, n: Field, p: G2Point) -> G2Point {
         let n_as_bits = n.to_le_bits(2);
         let mut out = G2Point::zero();

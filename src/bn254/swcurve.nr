@@ -159,10 +159,8 @@ impl Curve {
 
                 let hh = h.square();
                 let hhh = hh.mul(h);
-                // BUG: Doesn't work in a single line
                 let mut x3 = r.square().sub(hhh);
                 x3 = x3.sub(you1.mul(hh).double());
-                // BUG: Doesn't work in a single line
                 let mut y3 = r.mul(you1.mul(hh).sub(x3));
                 y3 = y3.sub(s1.mul(hhh));
                 let z3 = h.mul(z1).mul(z2);
@@ -201,22 +199,6 @@ impl Curve {
 
             Point{ x: x0, y: y0, z: z0 }
         }
-    }
-
-    // Scalar multiplication with scalar represented by a bit array (little-endian convention).
-    // If k is the natural number represented by `bits`, then this computes p + ... + p k times.
-    fn bit_mul_Field<N>(self, bits: [u1; N], p: Point) -> Point {
-        let mut out = Point::zero();
-        
-        for i in 0..N {
-            // TODO: Only start at first non-zero bit
-            out = self.double(out);
-            if(bits[253 - i] == 1) {
-                out = self.add(out, p);
-            }
-        }
-
-        out
     }
 
     // An example impl to compute 3*G
