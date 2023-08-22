@@ -13,7 +13,7 @@ Use following commands to use two libraries in your local
 
 To add the noir-bigint dependency, use a forked version of https://github.com/shuklaayush/noir-bigint,
 
-`git clone https://github.com/onurinanc/noir-bigint"`
+`git clone https://github.com/onurinanc/noir-bigint`
 
 Test the files using the following commands.
 `nargo test`
