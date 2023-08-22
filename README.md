@@ -6,16 +6,16 @@ BN254 Elliptic Curve Pairing Library
 
 (This library has a dependency of https://github.com/shuklaayush/noir-bigint However, due to a current issue, we need to add past version of noir-bigint library)
 
-## How to use it
-Use following commands to use two libraries in your local
+## How to test it
+1. Use following commands to use two libraries in your local
 
 `git clone https://github.com/onurinanc/noir-bn254`
 
-To add the noir-bigint dependency, use a forked version of https://github.com/shuklaayush/noir-bigint,
+2. To add the noir-bigint dependency, use a forked version of https://github.com/shuklaayush/noir-bigint,
 
 `git clone https://github.com/onurinanc/noir-bigint`
 
-Test the files using the following commands.
+3. Test the files using the following commands inside the noir-bn254.
 `nargo test`
 
 ## Methods
