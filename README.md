@@ -125,7 +125,7 @@ fn bn254_g2() -> BN254G2 {
 ```
 
 
-- You can create instances of the elliptic curves using
+You can create instances of the elliptic curves using
 
 ```
 let g2: BN254G2 = bn254_g2();
@@ -142,10 +142,10 @@ nargo test test_bn254g2_add1
 ### Features
 - fn pair(Q: G2Point, P: Point) -> Fp12
 
-It's the pairing function.
-Q is an element of G2
-P is an element of G1
-`pair` calculates the pairing in Fp12
+It's the pairing function. Q is an element of G2, and 
+P is an element of G1.
+
+- The `pair` calculates the pairing in Fp12
 
 - `Point` is a point on the G1 curve
 - `G2Point` is a point on the G2 curve
