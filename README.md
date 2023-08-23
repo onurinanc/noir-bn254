@@ -185,7 +185,7 @@ let x2: Fp12 = Fp12::new(a3, a2);
 let x3: Fp12 = Fp12::new(a4, a2);
 ```
 ## Benchmark
-Compilation time for one pairing function takes `0.5 h` for `16 GB RAM, Intel Core i5-12450H`
+Compilation time for one pairing function takes `~0.5 h` for `16 GB RAM, Intel Core i5-12450H`
 
 ## Contributing
 
