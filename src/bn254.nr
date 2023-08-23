@@ -651,7 +651,7 @@ fn test_fp12_final_exp() {
 #[test]
 fn test_final_exponentiation() {
     let res = pairing::final_exponentiation(Fp12::one());
-    assert(res.eq(Fp12::one));
+    assert(res.eq(Fp12::one()));
 }
 
 // ~33 minutes
